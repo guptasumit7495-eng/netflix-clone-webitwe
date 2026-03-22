@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Streamflix – Watch Anywhere</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #e50914;
+    --red-dark: #b20710;
+    --bg: #141414;
+    --surface: #1f1f1f;
+    --surface2: #2a2a2a;
+    --text: #e5e5e5;
+    --muted: #777;
+    --white: #fff;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4%;
+    height: 68px;
+    background: linear-gradient(to bottom, rgba(0,0,0,.85) 0%, transparent 100%);
+    transition: background .3s;
+  }
+  nav.scrolled { background: rgba(20,20,20,.97); }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    color: var(--red);
+    letter-spacing: .05em;
+    text-decoration: none;
+    user-select: none;
+  }
+  .nav-logo span { color: var(--white); }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .nav-links { display: flex; gap: 18px; list-style: none; }
+  .nav-links a {
+    color: var(--text); text-decoration: none; font-size: .88rem;
+    font-weight: 500; transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-btn {
+    padding: 6px 18px; border-radius: 4px;
+    background: var(--red); color: var(--white);
+    border: none; font-family: var(--font-body); font-size: .9rem;
+    font-weight: 600; cursor: pointer; transition: background .2s;
+  }
+  .nav-btn:hover { background: var(--red-dark); }
+  .nav-avatar {
+    width: 34px; height: 34px; border-radius: 4px;
+    background: linear-gradient(135deg, #e50914, #f5a623);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .85rem; cursor: pointer;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; align-items: center;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(to right, rgba(20,20,20,.95) 35%, transparent 70%),
+      linear-gradient(to top, rgba(20,20,20,1) 0%, transparent 30%),
+      url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1600&q=80') center/cover no-repeat;
+  }
+  .hero-content {
+    position: relative; padding: 0 4%; max-width: 600px;
+    animation: fadeUp .9s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(229,9,20,.15); border: 1px solid rgba(229,9,20,.5);
+    padding: 4px 12px; border-radius: 20px;
+    font-size: .78rem; font-weight: 600; color: #ff6b6b;
+    text-transform: uppercase; letter-spacing: .1em;
+    margin-bottom: 20px;
+  }
+  .hero-badge::before { content: '▶'; font-size: .6rem; }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    line-height: .95; color: var(--white);
+    letter-spacing: .02em; margin-bottom: 14px;
+  }
+  .hero-title span { color: var(--red); }
+  .hero-meta {
+    display: flex; gap: 14px; align-items: center;
+    margin-bottom: 16px; font-size: .85rem; color: #aaa;
+  }
+  .hero-meta .match { color: #46d369; font-weight: 700; }
+  .hero-meta .rating {
+    border: 1px solid #888; padding: 1px 6px; border-radius: 3px;
+    font-size: .75rem;
+  }
+  .hero-desc {
+    font-size: 1rem; line-height: 1.6; color: #ccc;
+    margin-bottom: 28px; max-width: 480px; font-weight: 300;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-play {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 30px; border-radius: 5px;
+    background: var(--white); color: #111;
+    border: none; font-family: var(--font-body);
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  .btn-play:hover { background: #d9d9d9; transform: scale(1.03); }
+  .btn-play .icon { font-size: 1.3rem; }
+  .btn-info {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 26px; border-radius: 5px;
+    background: rgba(109,109,110,.7); color: var(--white);
+    border: none; font-family: var(--font-body);
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: background .2s;
+  }
+  .btn-info:hover { background: rgba(109,109,110,1); }
+
+  /* ── ROWS ── */
+  .section { padding: 40px 4%; }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.55rem; letter-spacing: .06em;
+    color: var(--white); margin-bottom: 16px;
+  }
+  .section-title span { color: var(--red); }
+
+  .row { position: relative; }
+  .cards-track {
+    display: flex; gap: 10px; overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .cards-track::-webkit-scrollbar { display: none; }
+  .card {
+    flex: 0 0 calc(20% - 8px); min-width: 160px;
+    border-radius: 6px; overflow: hidden;
+    cursor: pointer; scroll-snap-align: start;
+    transition: transform .25s, box-shadow .25s;
+    position: relative;
+  }
+  .card:hover { transform: scale(1.07); z-index: 10; box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+  .card img {
+    width: 100%; aspect-ratio: 2/3; object-fit: cover;
+    display: block;
+  }
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 50%);
+    opacity: 0; transition: opacity .25s;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 12px;
+  }
+  .card:hover .card-overlay { opacity: 1; }
+  .card-title { font-size: .78rem; font-weight: 700; color: var(--white); margin-bottom: 5px; }
+  .card-actions { display: flex; gap: 6px; }
+  .card-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid rgba(255,255,255,.7);
+    background: rgba(0,0,0,.5); color: var(--white);
+    font-size: .75rem; cursor: pointer; transition: background .2s, border-color .2s;
+  }
+  .card-btn:hover { background: var(--red); border-color: var(--red); }
+  .card-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--red); color: #fff;
+    font-size: .6rem; font-weight: 700; padding: 2px 6px;
+    border-radius: 3px; text-transform: uppercase; letter-spacing: .06em;
+  }
+
+  /* ── FEATURED BANNER ── */
+  .featured {
+    margin: 20px 4% 40px;
+    border-radius: 12px; overflow: hidden;
+    position: relative; min-height: 220px;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    display: flex; align-items: center;
+  }
+  .featured-glow {
+    position: absolute; top: -40px; left: -40px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(229,9,20,.3) 0%, transparent 70%);
+    filter: blur(40px);
+  }
+  .featured-content {
+    position: relative; padding: 36px 40px; flex: 1;
+  }
+  .featured-tag {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .12em; color: var(--red); margin-bottom: 10px;
+  }
+  .featured-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    color: var(--white); letter-spacing: .05em; margin-bottom: 12px;
+  }
+  .featured-desc { font-size: .9rem; color: #aaa; max-width: 480px; line-height: 1.6; }
+  .featured-img {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 45%;
+    background: url('https://images.unsplash.com/photo-1531259683007-016a7b628fc3?w=800&q=80') center/cover no-repeat;
+    mask-image: linear-gradient(to right, transparent, rgba(0,0,0,.9) 40%);
+    -webkit-mask-image: linear-gradient(to right, transparent, rgba(0,0,0,.9) 40%);
+  }
+
+  /* ── TOP 10 ── */
+  .top10-card {
+    flex: 0 0 200px; position: relative; cursor: pointer;
+    transition: transform .25s;
+  }
+  .top10-card:hover { transform: scale(1.06); z-index: 10; }
+  .top10-num {
+    position: absolute; left: -14px; bottom: -10px;
+    font-family: var(--font-display);
+    font-size: 7rem; line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 3px rgba(255,255,255,.18);
+    user-select: none;
+    z-index: 2;
+  }
+  .top10-card img {
+    width: 100%; aspect-ratio: 16/9; object-fit: cover;
+    border-radius: 6px; display: block;
+    position: relative; z-index: 3;
+  }
+
+  /* ── CATEGORIES ── */
+  .genres {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    padding: 0 4% 40px;
+  }
+  .genre-pill {
+    padding: 8px 20px; border-radius: 20px;
+    background: var(--surface2); color: var(--text);
+    border: 1px solid #333; font-size: .85rem; font-weight: 500;
+    cursor: pointer; transition: background .2s, color .2s, border-color .2s;
+    white-space: nowrap;
+  }
+  .genre-pill:hover, .genre-pill.active {
+    background: var(--red); color: var(--white); border-color: var(--red);
+  }
+
+  /* ── PROMO STRIP ── */
+  .promo-strip {
+    margin: 10px 4% 50px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid #2a2a2a;
+    padding: 36px 44px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .promo-left { flex: 1; min-width: 240px; }
+  .promo-eyebrow {
+    font-size: .75rem; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--red); margin-bottom: 8px;
+  }
+  .promo-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    color: var(--white); margin-bottom: 8px; letter-spacing: .04em;
+  }
+  .promo-sub { font-size: .9rem; color: var(--muted); }
+  .promo-btn {
+    padding: 14px 32px; border-radius: 5px;
+    background: var(--red); color: var(--white);
+    border: none; font-family: var(--font-body);
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: background .2s, transform .15s;
+    white-space: nowrap;
+  }
+  .promo-btn:hover { background: var(--red-dark); transform: scale(1.03); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 50px 4% 30px;
+    border-top: 1px solid #272727;
+  }
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px; margin-bottom: 30px;
+  }
+  .footer-links a {
+    color: var(--muted); font-size: .8rem; text-decoration: none;
+    transition: color .2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+    font-size: .78rem; color: var(--muted);
+  }
+  .footer-logo {
+    font-family: var(--font-display); font-size: 1.5rem;
+    color: var(--red); letter-spacing: .05em;
+  }
+
+  /* ── MODAL ── */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #181818; border-radius: 12px; width: min(780px, 90vw);
+    overflow: hidden; transform: translateY(30px); transition: transform .3s;
+  }
+  .modal-backdrop.open .modal { transform: translateY(0); }
+  .modal-hero {
+    position: relative; height: 280px;
+    background: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=900&q=80') center/cover no-repeat;
+  }
+  .modal-hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, #181818 0%, transparent 60%);
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px; z-index: 2;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(0,0,0,.6); color: #fff;
+    border: none; font-size: 1.2rem; cursor: pointer; line-height: 1;
+  }
+  .modal-body { padding: 0 30px 30px; }
+  .modal-title {
+    font-family: var(--font-display); font-size: 2.4rem;
+    color: var(--white); letter-spacing: .05em; margin-bottom: 8px;
+  }
+  .modal-meta { display: flex; gap: 14px; margin-bottom: 16px; font-size: .85rem; color: #aaa; }
+  .modal-meta .match { color: #46d369; font-weight: 700; }
+  .modal-desc { font-size: .93rem; line-height: 1.65; color: #ccc; margin-bottom: 22px; }
+  .modal-actions { display: flex; gap: 12px; }
+
+  /* SCROLLBAR for cards on desktop */
+  @media (pointer: fine) {
+    .cards-track { overflow-x: hidden; }
+    .row:hover .cards-track { overflow-x: auto; }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .card { flex: 0 0 140px; }
+    .top10-card { flex: 0 0 160px; }
+    .featured-img { display: none; }
+    .promo-strip { flex-direction: column; }
+    .hero-title { font-size: 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-logo" href="#">STREAM<span>FLIX</span></a>
+  <ul class="nav-links">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">TV Shows</a></li>
+    <li><a href="#">Movies</a></li>
+    <li><a href="#">New & Popular</a></li>
+    <li><a href="#">My List</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="openModal()">Sign In</button>
+    <div class="nav-avatar">U</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Now Streaming</div>
+    <h1 class="hero-title">Echoes of the <span>Abyss</span></h1>
+    <div class="hero-meta">
+      <span class="match">98% Match</span>
+      <span>2024</span>
+      <span class="rating">TV-MA</span>
+      <span>2 Seasons</span>
+    </div>
+    <p class="hero-desc">A disgraced detective hunts a cryptic killer through neon-lit megacities, uncovering a conspiracy that reaches the highest levels of power — and the darkest corners of herself.</p>
+    <div class="hero-actions">
+      <button class="btn-play" onclick="openModal()"><span class="icon">▶</span> Play</button>
+      <button class="btn-info" onclick="openModal()">ⓘ More Info</button>
+    </div>
+  </div>
+</section>
+
+<!-- GENRES -->
+<div class="genres">
+  <div class="genre-pill active">All</div>
+  <div class="genre-pill">Action</div>
+  <div class="genre-pill">Drama</div>
+  <div class="genre-pill">Comedy</div>
+  <div class="genre-pill">Thriller</div>
+  <div class="genre-pill">Sci-Fi</div>
+  <div class="genre-pill">Horror</div>
+  <div class="genre-pill">Romance</div>
+  <div class="genre-pill">Documentary</div>
+  <div class="genre-pill">Anime</div>
+</div>
+
+<!-- TRENDING -->
+<section class="section">
+  <h2 class="section-title">🔥 Trending <span>Now</span></h2>
+  <div class="row">
+    <div class="cards-track" id="trending"></div>
+  </div>
+</section>
+
+<!-- FEATURED BANNER -->
+<div class="featured">
+  <div class="featured-glow"></div>
+  <div class="featured-content">
+    <div class="featured-tag">★ Critic's Pick · Series Finale</div>
+    <div class="featured-title">The Glass Archive</div>
+    <p class="featured-desc">After fifteen years in hiding, a master forger surfaces with a stolen manuscript that could rewrite history — or end it.</p>
+    <br>
+    <button class="btn-play" style="display:inline-flex;margin-top:4px" onclick="openModal()"><span class="icon">▶</span> Play</button>
+  </div>
+  <div class="featured-img"></div>
+</div>
+
+<!-- CONTINUE WATCHING -->
+<section class="section">
+  <h2 class="section-title">Continue <span>Watching</span></h2>
+  <div class="row">
+    <div class="cards-track" id="continue"></div>
+  </div>
+</section>
+
+<!-- TOP 10 -->
+<section class="section">
+  <h2 class="section-title">Top 10 <span>This Week</span></h2>
+  <div class="row">
+    <div class="cards-track" id="top10"></div>
+  </div>
+</section>
+
+<!-- NEW RELEASES -->
+<section class="section">
+  <h2 class="section-title">New <span>Releases</span></h2>
+  <div class="row">
+    <div class="cards-track" id="newreleases"></div>
+  </div>
+</section>
+
+<!-- PROMO STRIP -->
+<div class="promo-strip">
+  <div class="promo-left">
+    <div class="promo-eyebrow">Limited Offer</div>
+    <div class="promo-title">First Month Free</div>
+    <div class="promo-sub">Cancel anytime. No ads. 4K Ultra HD on all your devices.</div>
+  </div>
+  <button class="promo-btn" onclick="openModal()">Get Started →</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="#">FAQ</a><a href="#">Help Center</a><a href="#">Account</a>
+    <a href="#">Media Center</a><a href="#">Investor Relations</a><a href="#">Jobs</a>
+    <a href="#">Ways to Watch</a><a href="#">Terms of Use</a><a href="#">Privacy</a>
+    <a href="#">Cookie Preferences</a><a href="#">Corporate Information</a><a href="#">Contact Us</a>
+    <a href="#">Speed Test</a><a href="#">Legal Notices</a><a href="#">Only on Streamflix</a>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-logo">STREAMFLIX</div>
+    <span>© 2024 Streamflix, Inc.</span>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal" onclick="closeModalOnBackdrop(event)">
+  <div class="modal">
+    <div class="modal-hero">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title">Echoes of the Abyss</div>
+      <div class="modal-meta">
+        <span class="match">98% Match</span>
+        <span>2024</span>
+        <span style="border:1px solid #888;padding:1px 6px;border-radius:3px;font-size:.75rem;">TV-MA</span>
+        <span>2 Seasons</span>
+      </div>
+      <p class="modal-desc">A disgraced detective hunts a cryptic killer through neon-lit megacities, uncovering a conspiracy that reaches the highest levels of power — and the darkest corners of herself. Raw, visceral, unmissable.</p>
+      <div class="modal-actions">
+        <button class="btn-play"><span>▶</span> Play</button>
+        <button class="btn-info" style="background:rgba(60,60,60,.8)">+ My List</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const unsplashIds = [
+  'photo-1440404653325-ab127d49abc1',
+  'photo-1518676590629-3dcbd9c5a5c9',
+  'photo-1506748686214-e9df14d4d9d0',
+  'photo-1524985069026-dd778a71c7b4',
+  'photo-1509347528160-9a9e33742cdb',
+  'photo-1485846234645-a62644f84728',
+  'photo-1478720568477-152d9b164e26',
+  'photo-1507003211169-0a1dd7228f2d',
+  'photo-1559583985-c80d8ad9b29f',
+  'photo-1562577309-4932fdd64cd1',
+  'photo-1603739903239-8b6e64c3b185',
+  'photo-1560169897-fc0cdbdfa4d5',
+];
+const wideIds = [
+  'photo-1536440136628-849c177e76a1',
+  'photo-1531259683007-016a7b628fc3',
+  'photo-1518676590629-3dcbd9c5a5c9',
+  'photo-1440404653325-ab127d49abc1',
+  'photo-1524985069026-dd778a71c7b4',
+  'photo-1509347528160-9a9e33742cdb',
+  'photo-1485846234645-a62644f84728',
+  'photo-1562577309-4932fdd64cd1',
+  'photo-1603739903239-8b6e64c3b185',
+  'photo-1560169897-fc0cdbdfa4d5',
+];
+const titles = [
+  'Neon Requiem','The Last Cartographer','Zero Signal','Quiet Monsters',
+  'Amber Protocol','Dark Latitude','The Pale Meridian','Fractured Sky',
+  'Glass Archive','Cipher','Hollow Kingdom','Red Equilibrium',
+];
+const badges = ['NEW','4K','FILM','S2','S3','','NEW','FILM','','4K','NEW',''];
+
+function makeCard(i, wide = false) {
+  const imgId = wide ? wideIds[i % wideIds.length] : unsplashIds[i % unsplashIds.length];
+  const img = `https://images.unsplash.com/${imgId}?w=400&q=75`;
+  const badge = badges[i] ? `<div class="card-badge">${badges[i]}</div>` : '';
+  return `
+    <div class="card" onclick="openModal()">
+      ${badge}
+      <img src="${img}" alt="${titles[i % titles.length]}" loading="lazy"/>
+      <div class="card-overlay">
+        <div class="card-title">${titles[i % titles.length]}</div>
+        <div class="card-actions">
+          <div class="card-btn" title="Play">▶</div>
+          <div class="card-btn" title="Add to list">+</div>
+          <div class="card-btn" title="Like">♥</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function makeTop10(i) {
+  const imgId = wideIds[i % wideIds.length];
+  const img = `https://images.unsplash.com/${imgId}?w=400&q=75`;
+  return `
+    <div class="top10-card" onclick="openModal()">
+      <div class="top10-num">${i + 1}</div>
+      <img src="${img}" alt="${titles[i % titles.length]}" loading="lazy"/>
+    </div>`;
+}
+
+// ─── POPULATE ────────────────────────────────────────────────────────────────
+const trending     = document.getElementById('trending');
+const continueRow  = document.getElementById('continue');
+const top10Row     = document.getElementById('top10');
+const newReleases  = document.getElementById('newreleases');
+
+for (let i = 0; i < 10; i++) trending.innerHTML    += makeCard(i);
+for (let i = 2; i < 10; i++) continueRow.innerHTML  += makeCard(i, true);
+for (let i = 0; i < 10; i++) top10Row.innerHTML     += makeTop10(i);
+for (let i = 5; i < 15; i++) newReleases.innerHTML  += makeCard(i % 12);
+
+// ─── NAV SCROLL ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', scrollY > 60);
+});
+
+// ─── GENRE PILLS ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.genre-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+  });
+});
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeModalOnBackdrop(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
